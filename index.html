@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#163b30"><title>Kaza Namazım</title>
+<link rel="manifest" href="manifest.json">
+<style>
+:root{--bg:#101a17;--panel:#1b2924;--panel2:#23352e;--text:#f4f3eb;--muted:#aebeb5;--gold:#d7bc7a;--green:#9ec9ac;--line:#33483e;--red:#d88c83}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(160deg,#11251e,#101a17 48%);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;min-height:100vh;padding:18px 16px 40px}
+main{max-width:620px;margin:auto}.header{display:flex;align-items:center;gap:13px;margin:8px 0 22px}.logo{width:52px;height:52px;border-radius:18px;background:#25483a;display:grid;place-items:center;color:var(--gold);font-size:25px}.header h1{font-size:22px;margin:0}.header p{margin:3px 0;color:var(--muted);font-size:13px}
+.hero{background:linear-gradient(135deg,#214b3c,#16372c);border:1px solid #456253;border-radius:24px;padding:21px;margin-bottom:18px}.hero .label{font-size:12px;color:#c6d9cb;letter-spacing:1px}.hero h2{font-size:32px;margin:9px 0 4px}.hero p{margin:0;color:#c6d9cb;font-size:14px}.progress{height:10px;border-radius:99px;background:#385b49;margin:18px 0 8px;overflow:hidden}.progress div{height:100%;background:var(--gold);border-radius:99px;width:0;transition:width .2s}.progressline{display:flex;justify-content:space-between;color:#c6d9cb;font-size:12px}
+.sectionhead{display:flex;justify-content:space-between;align-items:center;margin:22px 2px 12px}.sectionhead h3{margin:0;font-size:16px}.sectionhead span{font-size:12px;color:var(--muted)}
+.cards{display:grid;gap:10px}.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:15px}.prayer{display:flex;justify-content:space-between;align-items:center;gap:12px}.prayername{font-size:16px;font-weight:650}.remaining{font-size:12px;color:var(--muted);margin-top:3px}.count{font-weight:700;font-size:18px;color:var(--gold);text-align:right}.count small{display:block;font-size:11px;font-weight:400;color:var(--muted)}.actions{display:flex;gap:9px;margin-top:12px}.btn{border:0;border-radius:13px;padding:11px 13px;font-weight:650;cursor:pointer;font-size:14px}.add{background:var(--green);color:#10251b;flex:1}.undo{background:#2d3d35;color:var(--text)}.goalbox{display:flex;align-items:center;justify-content:space-between;gap:12px}.goalbox p{margin:4px 0 0;font-size:12px;color:var(--muted)}select,input{background:#16231d;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:10px;font-size:14px}.goalbox select{min-width:100px}.today{display:flex;justify-content:space-between;align-items:center}.today strong{font-size:23px;color:var(--gold)}.secondary{background:#2b3b33;color:var(--text);border:1px solid var(--line);padding:11px;border-radius:12px;width:100%;font-weight:600}.footer{font-size:12px;color:var(--muted);line-height:1.6;margin:20px 3px}.settings{display:none;margin-top:12px}.settings.show{display:block}.settings input{width:100%;margin:6px 0 12px}.settings label{font-size:13px;color:var(--muted)}.danger{color:var(--red)}.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#e5d3a2;color:#17271e;padding:11px 17px;border-radius:99px;font-size:13px;display:none;box-shadow:0 4px 20px #0005}
+</style></head>
+<body><main>
+<div class="header"><div class="logo">☾</div><div><h1>Kaza Namazım</h1><p>Adım adım, düzenli ve huzurla.</p></div></div>
+<section class="hero"><div class="label">GENEL İLERLEMEN</div><h2 id="totalDone">0</h2><p>kaza namazı tamamlandı</p><div class="progress"><div id="bar"></div></div><div class="progressline"><span id="pct">0%</span><span id="totalRemain">14.780 kaldı</span></div></section>
+<div class="sectionhead"><h3>Namaz borçların</h3><span>Bir kaza kıldığında +1</span></div><section class="cards" id="prayers"></section>
+<div class="sectionhead"><h3>Bugünkü hedef</h3></div><section class="card goalbox"><div><b>Günlük hedef</b><p id="goalStatus">Bugün 0 / 5</p></div><select id="goal"><option>1</option><option>3</option><option selected>5</option><option>10</option><option>15</option><option>20</option></select></section>
+<section class="card today" style="margin-top:10px"><div><span style="color:var(--muted);font-size:13px">Bugün kılınan</span><br><strong id="todayCount">0</strong></div><button class="secondary" style="width:auto" id="resetToday">Bugünü sıfırla</button></section>
+<div class="sectionhead"><h3>Hesap ayarları</h3></div><button class="secondary" id="toggleSettings">Başlangıç borcunu düzenle</button>
+<section class="card settings" id="settings"><div id="editInputs"></div><button class="secondary" id="saveSettings">Borç sayılarını kaydet</button><button class="secondary danger" style="margin-top:9px" id="resetAll">Tüm ilerlemeyi sıfırla</button></section>
+<p class="footer">Bu uygulama kişisel takip içindir. Borç hesabını kendi ihtiyatlı hesabına göre düzenleyebilirsin. Kayıtlar bu cihazın tarayıcısında saklanır.</p>
+</main><div class="toast" id="toast"></div>
+<script>
+const names=['Sabah','Öğle','İkindi','Akşam','Yatsı'];
+const initial=2956;
+let data=JSON.parse(localStorage.getItem('kazaData')||'null');
+if(!data)data={remaining:Object.fromEntries(names.map(n=>[n,initial])),done:Object.fromEntries(names.map(n=>[n,0])),daily:{},goal:5};
+const dateKey=()=>new Date().toISOString().slice(0,10);
+function save(){localStorage.setItem('kazaData',JSON.stringify(data));render()}
+function todayTotal(){return data.daily[dateKey()]||0}
+function totalDone(){return names.reduce((a,n)=>a+data.done[n],0)}
+function totalRemaining(){return names.reduce((a,n)=>a+data.remaining[n],0)}
+function toast(s){let t=document.getElementById('toast');t.textContent=s;t.style.display='block';setTimeout(()=>t.style.display='none',1600)}
+function add(n){if(data.remaining[n]<=0){toast('Bu vakit için borç kalmadı.');return}data.remaining[n]--;data.done[n]++;data.daily[dateKey()]=(data.daily[dateKey()]||0)+1;save();toast(n+' kaza eklendi')}
+function undo(n){if(data.done[n]<=0){toast('Geri alınacak kayıt yok.');return}data.done[n]--;data.remaining[n]++;if(data.daily[dateKey()]>0)data.daily[dateKey()]--;save();toast('Son kayıt geri alındı')}
+function render(){let total=totalDone(),remain=totalRemaining();document.getElementById('totalDone').textContent=total.toLocaleString('tr-TR');document.getElementById('totalRemain').textContent=remain.toLocaleString('tr-TR')+' kaldı';document.getElementById('pct').textContent=(total+remain?100*total/(total+remain):100).toFixed(2)+'%';document.getElementById('bar').style.width=(total+remain?100*total/(total+remain):100)+'%';document.getElementById('todayCount').textContent=todayTotal();document.getElementById('goalStatus').textContent='Bugün '+todayTotal()+' / '+data.goal;document.getElementById('goal').value=String(data.goal);
+document.getElementById('prayers').innerHTML=names.map(n=>`<article class="card"><div class="prayer"><div><div class="prayername">${n}</div><div class="remaining">Kalan: ${data.remaining[n].toLocaleString('tr-TR')}</div></div><div class="count">${data.done[n].toLocaleString('tr-TR')}<small>tamamlandı</small></div></div><div class="actions"><button class="btn add" onclick="add('${n}')">+1 Kıldım</button><button class="btn undo" onclick="undo('${n}')">Geri al</button></div></article>`).join('')}
+}
+document.getElementById('goal').addEventListener('change',e=>{data.goal=+e.target.value;save()});
+document.getElementById('resetToday').onclick=()=>{if(confirm('Bugünkü kayıtları geri almak ister misin? Bu işlem bugünkü kayıtları tek tek borca geri ekler.')){let t=todayTotal();for(let i=0;i<t;i++){let n=names.find(n=>data.done[n]>0);if(!n)break;data.done[n]--;data.remaining[n]++}data.daily[dateKey()]=0;save()}};
+document.getElementById('toggleSettings').onclick=()=>{let s=document.getElementById('settings');s.classList.toggle('show');document.getElementById('editInputs').innerHTML=names.map(n=>`<label>${n} için kalan borç</label><input type="number" min="0" id="edit-${n}" value="${data.remaining[n]}">`).join('')};
+document.getElementById('saveSettings').onclick=()=>{names.forEach(n=>{let v=document.getElementById('edit-'+n);if(v)data.remaining[n]=Math.max(0,+v.value||0)});save();toast('Borç sayıları güncellendi')};
+document.getElementById('resetAll').onclick=()=>{if(confirm('Tüm kılınan ve kalan kayıtları başlangıç değerine döndürmek istediğine emin misin?')){data={remaining:Object.fromEntries(names.map(n=>[n,initial])),done:Object.fromEntries(names.map(n=>[n,0])),daily:{},goal:5};save();toast('İlerleme sıfırlandı')}};
+render();
+</script></body></html>
